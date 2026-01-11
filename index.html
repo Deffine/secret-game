@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>CBOBOB</title>
+  <style>
+    * {
+      touch-action: manipulation;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #050505;
+      color: #e0e0e0;
+      font-family: "Courier New", monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+    
+    #welcome {
+      margin-top: 40px;
+      font-size: 32px;
+      animation: fadeIn 2s ease forwards;
+      user-select: text;
+    }
+    
+    #secret-word {
+      color: rgb(220, 210, 250);
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        text-shadow: 0 0 0 #000;
+      }
+      
+      50% {
+        text-shadow: 0 0 12px #fff;
+      }
+      
+      100% {
+        text-shadow: 0 0 0 #000;
+      }
+    }
+    
+    .pulsing {
+      animation: pulse 0.8s infinite;
+    }
+    
+    #console {
+      margin-top: 40px;
+      width: 80%;
+      max-width: 700px;
+      border: 2px solid #00ff66;
+      background: #001b0f;
+      box-shadow: 0 0 20px #00ff6680;
+      position: relative;
+    }
+    
+    #console-title {
+      padding: 8px;
+      background: #003b20;
+      color: #00ff66;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    #console-log {
+      height: 250px;
+      overflow-y: auto;
+      padding: 10px;
+      font-size: 14px;
+    }
+    
+    .log {
+      margin-bottom: 6px;
+      color: #00ff66;
+    }
+    
+    .log.system {
+      color: #7dffb0;
+      font-style: italic;
+      opacity: 0.9;
+      padding-left: 10px;
+      border-left: 2px solid #00ff6680;
+    }
+    
+    .log.core {
+      font-weight: bold;
+      text-shadow: 0 0 6px #00ffcc88;
+      letter-spacing: 1px;
+    }
+    
+    .log.congrats {
+      font-weight: bold;
+      font-size: 16px;
+      text-shadow: 0 0 8px;
+    }
+    
+    #console-input {
+      width: 97%;
+      padding: 10px;
+      border: none;
+      outline: none;
+      background: black;
+      color: #00ff66;
+      font-family: inherit;
+      font-size: 16px;
+    }
+    
+    #index {
+      margin-top: 30px;
+      width: 80%;
+      max-width: 700px;
+      max-height: 1000px;
+      overflow-y: auto;
+    }
+    
+    .hint {
+      margin-top: 5px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #999;
+      font-style: italic;
+    }
+    
+    #clear-history-btn,
+    #sort-btn,
+    #toggle-chart {
+      background: #003b20;
+      color: #00ffcc;
+      border: 1px solid #00ff66;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    
+    #clear-history-btn:hover,
+    #sort-btn:hover,
+    #toggle-chart:hover {
+      background: #004422;
+      color: #00ff88;
+    }
+    
+    .secret-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    
+    .secret-circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    
+    #bg-layer {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    #hidden-binary {
+      color: #050505;
+      font-size: 16px;
+      letter-spacing: 2px;
+      user-select: text;
+      white-space: nowrap;
+    }
+    
+    /* ===== DIFFICULTY CHART ===== */
+    #difficulty-chart {
+      margin-top: 20px;
+      width: 80%;
+      max-width: 700px;
+      font-size: 14px;
+    }
+    
+    .diff-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    
+    .diff-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div id="bg-layer">
+    <div id="hidden-binary">01100001 01110111 01100001 01101011 01100101</div>
+  </div>
+  
+  <div id="welcome">Welcome to the <span id="secret-word">secret</span> game!</div>
+  
+  <div id="console">
+    <div id="console-title">
+      FAKE CONSOLE
+      <div>
+        <button id="sort-btn">Sort: Found</button>
+        <button id="clear-history-btn">Clear History</button>
+      </div>
+    </div>
+    <div id="console-log"></div>
+    <input id="console-input" autocomplete="off" placeholder="type something..." />
+  </div>
+  
+  <div id="index">
+    <div id="s1" class="locked"></div>
+    <div id="s2" class="locked"></div>
+    <div id="s3" class="locked"></div>
+    <div id="s4" class="locked"></div>
+    <div id="s5" class="locked"></div>
+    <div id="s6" class="locked"></div>
+    <div id="s7" class="locked"></div>
+  </div>
+  
+  <button id="toggle-chart">Chart: ASC</button>
+  <div id="difficulty-chart"></div>
+  
+  <script src = "secret.js" defer></script>
+</body>
+
+      </html>
