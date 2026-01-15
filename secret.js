@@ -4,7 +4,7 @@ const binary = document.getElementById("hidden-binary");
 const clearBtn = document.getElementById("clear-history-btn");
 const index = document.getElementById("index");
 
-const secrets = { s1: false, s2: false, s3: false, s4: false, s5: false, s6: false, s7: false, s8: false, s9: false, s10: false, s11: false, s12: false, s13: false, s14: false, s15: false };
+const secrets = { s1: false, s2: false, s3: false, s4: false, s5: false, s6: false, s7: false, s8: false, s9: false, s10: false, s11: false, s12: false, s13: false, s14: false, s15: false, s16: false, s17: false, s18: false, s19: false, s20: false, s21: false, s22: false, s23: false, s24: false, s25: false, s26: false, s27: false, s28: false, s29: false, s30: false };
 const clearHistory = [];
 const difficultyColors = {
   Easy: "#63EF00",
@@ -18,24 +18,39 @@ const difficultyColors = {
 const difficultyOrder = ["Easy", "Medium", "Hard", "Intense", "Insane", "Extreme", "Terrifying"];
 
 const secretInfo = {
-  s1: { name: "Relentless", level: "Intense", hint: "Secrets don't want to be seen. They want obsession." },
+  s1: { name: "Relentless", level: "Insane", hint: "The word is not just a word." },
   s2: { name: "Mirror call", level: "Hard", hint: "Say my name." },
   s3: { name: "Abyss", level: "Hard", hint: "Background speaks." },
-  s4: { name: "l33t5p34k", level: "Extreme", hint: "Might be found, yet unseen." },
+  s4: { name: "l33t5p34k", level: "Terrifying", hint: "Might be found, yet unseen." },
   s5: { name: "Shortcut", level: "Easy", hint: "it's very convenient." },
   s6: { name: "Desperate call", level: "Easy", hint: "Call for help." },
   s7: { name: "The undefined", level: "Easy", hint: "Something's right." },
   s8: { name: "Echo", level: "Medium", hint: "Just repeat." },
-  s9: { name: "Difficulties", level: "Intense", hint: "Collect the first." },
+  s9: { name: "Difficulties", level: "Insane", hint: "Collect the first." },
   s10: { name: "Presence", level: "Medium", hint: "Don't move." },
-  s11: { name: "Emotes", level: "Hard", hint: "Time to move." },
+  s11: { name: "Expression", level: "Hard", hint: "Mood." },
   s12: { name: "Clockwatcher", level: "Hard", hint: "O' clock." },
   s13: { name: "Scroll Obsession", level: "Intense", hint: "Just keep scrolling." },
   s14: {
     name: "Banana",
     level: "Intense",
-    hint: "Title. <img src='caesar.png' style='width:30px;height:auto;vertical-align:middle;'>"
-  }
+    hint: "Title. <img src='https://i.natgeofe.com/n/b8740e26-5d8e-45e7-b113-a23795a28698/01-julius-ceasar-51243549.jpg' style='width:30px;height:auto;vertical-align:middle;'>",
+  },
+  s15: { name: "No escape", level: "Easy", hint: "Stop trying to escape." },
+  s16: {
+    name: "Clown",
+    level: "Insane",
+    hint: `<span id="s16-hint" style="user-select:text;cursor:pointer;text-decoration:underline;">https://social.mtdv.me/37edEkRaFv</span>`
+  },
+  s17: { name: "The truth", level: "Easy", hint: "Is a hint necessary?" },
+  s18: { name: "Free", level: "Hard", hint: "Uh... it's free." },
+  s19: { name: "Q.E.D", level: "Medium", hint: "End of math proof." },
+  s20: { name: "Smoll country", level: "Easy", hint: "Smallest country." },
+  s21: { name: "Baconian", level: "Hard", hint: '<span style = "user-select: text">BABAA ABAAA ABBAA AABBA.</span>' },
+  s22: { name: "Mr president", level: "Medium", hint: '<span style = "user-select: text">01100010 00110100 01110010 01110010 00110100 01100011 01101011 00100000 00110000 01100010 00110100 01101101 00110100</span>.' },
+  s23: { name: "Might", level: "Medium", hint: "Instruction." },
+  s24: { name: "Pi", level: "Easy", hint: "3.141592" },
+  s25: { name: "Eclipse", level: "Extreme", hint: '<span style= "user-select: text">317427352074303020627231676874</span>.' },
 };
 
 /* ===== SORT LOGIC ===== */
@@ -60,6 +75,24 @@ function logSystem(t) {
   const d = document.createElement("div");
   d.className = "log system";
   d.textContent = t;
+  logBox.appendChild(d);
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+function logSystemCopyable(t) {
+  const d = document.createElement("div");
+  d.className = "log system copyable";
+  d.innerHTML = `<span class="copy-text" title="Click to copy">${t}</span>`;
+  
+  d.querySelector(".copy-text").onclick = () => {
+    navigator.clipboard.writeText(t).then(() => {
+      d.querySelector(".copy-text").textContent = "Copied.";
+      setTimeout(() => {
+        d.querySelector(".copy-text").textContent = t;
+      }, 1000);
+    });
+  };
+  
   logBox.appendChild(d);
   logBox.scrollTop = logBox.scrollHeight;
 }
@@ -202,8 +235,17 @@ let askedForReal = false;
 // SECRET 8 (Medium)
 let lastCmd = null; // lưu command trước
 let repeatCount = 0; // số lần lặp liên tiếp
-// SECRET 10 ()
+// SECRET 10 (Medium)
 let presenceTimer = null; // Presence secret
+// SECRET 16 (Insane)
+let waitingForAudio = false; // trạng thái chờ user nhấn Enter để play audio
+let pressEnterTimeout = null; // lưu timeout ID
+let audioTimeouts = []; // lưu tất cả setTimeout liên quan đến audio
+// SECRET 25 (Extreme)
+let eclipseStage = 0;
+// 0 = chưa biết gì
+// 1 = đã thấy brainfuck
+// 2 = đã thấy pastebin
 
 input.addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
@@ -231,7 +273,13 @@ input.addEventListener("keydown", e => {
   }
   
   // SECRET 4 (Insane)
+  if (secrets.s3 && cmd === "4w4k3" && !secrets.s4) {
+    logSystem("1337 wasn't just a number.")
+    logSystem("What was it?");
+  }
+  
   if (secrets.s3 && cmd === "leetspeak" && !secrets.s4) {
+    logSystem("Good old days...");
     unlockSecret("s4");
   }
   
@@ -281,16 +329,15 @@ input.addEventListener("keydown", e => {
   }
   
   // SECRET 11 (Hard) 
-  // check /e {something}
-  if (!secrets.s11 && cmd.startsWith("/e ")) {
-    const emote = cmd.slice(3).trim(); // lấy chữ sau /e
-    if (emote) { // có nhập gì đó
-      logSystem("Emote acknowledged.");
-      unlockSecret("s11");
-    }
+  if (
+    !secrets.s11 &&
+    /^(:\)|:\(|:d|:p|;\)|<3|¯\\_\(ツ\)_\/¯)$/i.test(raw.trim())
+  ) {
+    logSystem("How come?");
+    unlockSecret("s11");
   }
   
-  // SECRET 12 (Intense)
+  // SECRET 12 (Hard)
   let now = new Date();
   let minutes = now.getMinutes();
   if (!secrets.s12 && minutes === 0) {
@@ -304,7 +351,124 @@ input.addEventListener("keydown", e => {
     unlockSecret("s14");
   }
   
-  // SECRET 15 (Insane)
+  // SECRET 15 (Easy)
+  if ((cmd === "exit" || cmd === "quit") && !secrets.s15) {
+    logSystem("You're trapped.")
+    unlockSecret("s15");
+  }
+  
+  // SECRET 16 (Insane)
+  // nếu đang chờ press enter nhưng gõ cmd khác
+  if (pressEnterTimeout && cmd !== "skibidi toilet" && !waitingForAudio) {
+    clearTimeout(pressEnterTimeout);
+    pressEnterTimeout = null;
+    logSystem("Cancelled.");
+  }
+  // Obtain Logic
+  if (cmd === "skibidi toilet" && !secrets.s16) {
+    logSystem("lol.");
+    
+    pressEnterTimeout = setTimeout(() => {
+      logSystem("Press Enter.");
+      waitingForAudio = true;
+      pressEnterTimeout = null;
+    }, 3000);
+    
+    return;
+  }
+  
+  // play audio khi user nhấn Enter sau "Press Enter"
+  if (waitingForAudio && !secrets.s16) {
+    waitingForAudio = false;
+    const morsecode = new Audio("morsecode.wav");
+    morsecode.play().catch(() => {
+      logSystem("Audio blocked. Try pressing Enter again.");
+      waitingForAudio = true; // retry
+    });
+    
+    morsecode.addEventListener("ended", () => {
+      logSystem("Did you catch it?");
+      setTimeout(() => logSystem("If so, you might need help from secret 14."), 2000);
+      setTimeout(() => logSystem("Or just listen again."), 4000);
+    });
+    
+    return;
+  }
+  
+  // unlock secret 16
+  if (cmd === "cl0wn" && !secrets.s16) {
+    unlockSecret("s16");
+  }
+  
+  // SECRET 17 (Easy)
+  if (cmd === "b3st g4m3" && !secrets.s17) {
+    logSystem("clearly.")
+    unlockSecret("s17");
+  }
+  
+  // SECRET 18 (Hard)
+  if (cmd === "fr33" && !secrets.s18) {
+    unlockSecret("s18");
+  }
+  
+  // SECRET 19 (Medium)
+  if (/^q(\.?)e(\.?)d\.?$/i.test(cmd.trim()) && !secrets.s19) {
+    unlockSecret("s19");
+  }
+  
+  // SECRET 20 (Easy)
+  if (cmd === "vatican city" && !secrets.s20) {
+    unlockSecret("s20");
+  }
+  
+  // SECRET 21 (Hard)
+  if (cmd === "wing" && !secrets.s21) {
+    unlockSecret("s21")
+  }
+  
+  // SECRET 22 (Medium) 
+  if (cmd === "b4rr4ck 0b4m4" && !secrets.s22) {
+    unlockSecret("s22");
+  }
+  
+  // SECRET 23 (Medium)
+  if (cmd === "might" && !secrets.s23) {
+    unlockSecret("s23");
+  }
+  
+  // SECRET 24 (Medium)
+  if (cmd === "pi" && !secrets.s24) {
+    logSystem("symbol.")
+  }
+  
+  if (cmd === "π" && !secrets.s24) {
+    unlockSecret("s24");
+  }
+  
+  // SECRET 25 (Extreme)
+  if (cmd === "too bright" && !secrets.s25) {
+    logSystem("Wrong one.")
+  }
+  if (cmd === "t00 br1ght" && !secrets.s25) {
+    eclipseStage = 1;
+    logSystemCopyable("++++++++++[>+>+++>+++++++>++++++++++<<<<-]>>>>+++++++++++++++.++.-------.")
+  }
+  if (cmd === "sun" && !secrets.s25) {
+    if (eclipseStage < 1) {
+      return;
+    }
+    eclipseStage = 2;
+    logSystem("Pastebin.");
+    logSystemCopyable("seKsrcdN");
+    logSystem("Password: secret25.");
+  }
+  if (cmd === "moon" && !secrets.s25) {
+    if (eclipseStage < 2) {
+      return;
+    }
+    unlockSecret("s25");
+    logSystem("Elite knowledge.");
+  }
   
 });
 
@@ -313,34 +477,57 @@ input.addEventListener("keydown", e => {
 input.addEventListener("focus", () => {
   if (presenceTimer || secrets.s10) return; // đã unlock hoặc đang chạy timer
   presenceTimer = setTimeout(() => {
-    unlockSecret("s10"); // Presence unlock sau 60s
+    unlockSecret("s10"); // Presence unlock sau 20s
     logSystem("Told you.")
-  }, 60000); // 60000ms = 60s
+  }, 20000); // 20000ms = 20s
 });
 
-["input", "keydown", "blur"].forEach(ev => {
+["input", "blur"].forEach(ev => {
   input.addEventListener(ev, () => {
     clearTimeout(presenceTimer);
     presenceTimer = null;
   });
 });
 
-// SECRET 13: Scroll Obsession (Intense)
+// SECRET 13 (Intense)
 let scrollCount = 0;
 let scrollTimer = null;
-const scrollTarget = logBox; // scroll trên logBox
 
-scrollTarget.addEventListener("scroll", () => {
-  scrollCount++;
-  
-  clearTimeout(scrollTimer);
-  // reset nếu player dừng scroll > 3s
-  scrollTimer = setTimeout(() => {
-    scrollCount = 0;
-  }, 3000);
-  
-  if (scrollCount >= 5000 && !secrets.s13) { // scroll 5000 lần trong khoảng 3s ngắn
-    logSystem("Stop...")
-    unlockSecret("s13");
+// Scroll trên logBox và index cùng tính
+const scrollTargets = [logBox, index];
+scrollTargets.forEach(target => {
+  target.addEventListener("scroll", () => {
+    scrollCount++;
+    
+    clearTimeout(scrollTimer);
+    // reset nếu player dừng scroll > 3s
+    scrollTimer = setTimeout(() => {
+      scrollCount = 0;
+    }, 3000);
+    
+    if (scrollCount >= 5000 && !secrets.s13) { // scroll 5000 lần trong 3s
+      logSystem("Stop...");
+      unlockSecret("s13");
+    }
+  });
+});
+
+// SECRET 16 (Insane)
+document.addEventListener("click", (e) => {
+  if (e.target.id === "s16-hint") {
+    // copy text vào clipboard
+    navigator.clipboard.writeText(e.target.textContent)
+      .then(() => {
+        
+      });
+    
+    // thay hint sau 1s hoặc khi player "quay lại"
+    setTimeout(() => {
+      e.target.textContent = "What did you see?";
+      e.target.style.cursor = "default";
+      e.target.style.userSelect = "none";
+      e.target.style.color = "#999";
+      e.target.style.textDecoration = "none";
+    }, 1000);
   }
 });
