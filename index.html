@@ -126,14 +126,14 @@
       background: black;
       color: #00ff66;
       font-family: inherit;
-      font-size: 16px;
+      font-size: 17px;
     }
     
     #index {
       margin-top: 30px;
       width: 80%;
       max-width: 700px;
-      max-height: 700px;
+      max-height: 600px;
       overflow-y: auto;
     }
     
@@ -216,6 +216,14 @@
       height: 10px;
       border-radius: 50%;
     }
+    
+    #instruction {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 16px;
+    }
   </style>
 </head>
 
@@ -236,7 +244,7 @@
       </div>
     </div>
     <div id="console-log"></div>
-    <input id="console-input" autocomplete="off" placeholder="type something..." />
+    <input id="console-input" placeholder="Type something..." />
   </div>
   
   <div id="index">
@@ -251,15 +259,16 @@
   
   <button id="toggle-chart">Chart: ASC</button>
   <div id="difficulty-chart"></div>
-  <p style="color: white; font-family: monospace; font-size:14px; margin-top: 200px">
-    ALL codes are lowercase and MIGHT contain spaces, leetspeak. Example: b3st g4m3.
-  </p>
-  <p style="color: white; font-family: monospace; font-size:14px; margin-top: 200px">WARNING:
-You can use "r3s3t d4t4" to reset your game progress.
-This is NOT an in-game command.</p>
+  <div id="instruction">
+    <p style="color: white; font-family: monospace; font-size:14px; margin-top: 200px">
+      ALL codes are lowercase and MIGHT contain spaces, leetspeak. Example: b3st g4m3.
+    </p>
+    <p style="color: white; font-family: monospace; font-size:14px; margin-top: 200px">WARNING:
+      You can use "r3s3t d4t4" to reset your game progress.
+      This is NOT an in-game command.</p>
+  </div>
   <script src="secret.js" defer></script>
   <!--------------fr33--------------->
 </body>
 
 </html
-  
