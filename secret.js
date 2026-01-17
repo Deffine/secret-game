@@ -5,6 +5,34 @@ const clearBtn = document.getElementById("clear-history-btn");
 const index = document.getElementById("index");
 
 const secrets = { s1: false, s2: false, s3: false, s4: false, s5: false, s6: false, s7: false, s8: false, s9: false, s10: false, s11: false, s12: false, s13: false, s14: false, s15: false, s16: false, s17: false, s18: false, s19: false, s20: false, s21: false, s22: false, s23: false, s24: false, s25: false, s26: false, s27: false, s28: false, s29: false, s30: false };
+
+const SAVE_KEY = "console-secrets-save";
+
+function saveGame() {
+  const data = {
+    secrets,
+    sortMode
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+}
+
+function loadGame() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) return;
+  
+  try {
+    const data = JSON.parse(raw);
+    if (data.secrets) {
+      Object.keys(secrets).forEach(k => {
+        secrets[k] = !!data.secrets[k];
+      });
+    }
+    if (data.sortMode) sortMode = data.sortMode;
+  } catch (e) {
+    console.warn("Save corrupted 💀");
+  }
+}
+
 const clearHistory = [];
 const difficultyColors = {
   Easy: "#63EF00",
@@ -48,7 +76,7 @@ const secretInfo = {
   s20: { name: "Smoll country", level: "Easy", hint: "Smallest country." },
   s21: { name: "Baconian", level: "Hard", hint: '<span style = "user-select: text">BABAA ABAAA ABBAA AABBA.</span>' },
   s22: { name: "Mr president", level: "Medium", hint: '<span style = "user-select: text">01100010 00110100 01110010 01110010 00110100 01100011 01101011 00100000 00110000 01100010 00110100 01101101 00110100</span>.' },
-  s23: { name: "Might", level: "Medium", hint: "Instruction." },
+  s23: { name: "Almighty", level: "Medium", hint: "Instruction." },
   s24: { name: "Pi", level: "Easy", hint: "3.141592" },
   s25: { name: "Eclipse", level: "Extreme", hint: '<span style= "user-select: text">317427352074303020627231676874</span>.' },
 };
@@ -57,6 +85,7 @@ const secretInfo = {
 let sortMode = "found";
 document.getElementById("sort-btn").onclick = () => {
   sortMode = sortMode === "found" ? "difficulty" : "found";
+  saveGame(); // 👈
   document.getElementById("sort-btn").textContent =
     "Sort: " + (sortMode === "found" ? "Found" : "Difficulty");
   renderSecrets();
@@ -166,6 +195,7 @@ function renderSecrets() {
   }
 }
 
+loadGame();
 renderSecrets();
 
 /* ===== DIFFICULTY CHART ===== */
@@ -208,6 +238,7 @@ clearBtn.onclick = () => {
 function unlockSecret(id) {
   if (secrets[id]) return;
   secrets[id] = true;
+  saveGame(); // 👈 thêm dòng này
   renderSecrets();
   logCongrats(
     `Secret ${id.slice(1)} unlocked: ${secretInfo[id].name} (${secretInfo[id].level})`,
@@ -253,6 +284,16 @@ input.addEventListener("keydown", e => {
     cmd = raw.toLowerCase();
   input.value = "";
   logUser(raw);
+  
+  // RESET DATA
+  if (cmd === "r3s3t d4t4") {
+    localStorage.removeItem(SAVE_KEY);
+    logCore("SAVE DATA OBLITERATED.");
+    setTimeout(() => {
+      location.reload()
+    }, 1000);
+    return;
+  }
   
   // SECRET 2 (Hard)
   if (cmd === "fake console" && !secrets.s2) {
@@ -432,7 +473,7 @@ input.addEventListener("keydown", e => {
   }
   
   // SECRET 23 (Medium)
-  if (cmd === "might" && !secrets.s23) {
+  if (cmd === "all might" && !secrets.s23) {
     unlockSecret("s23");
   }
   
