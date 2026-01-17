@@ -55,7 +55,7 @@ const secretInfo = {
   s7: { name: "The undefined", level: "Easy", hint: "Something's right." },
   s8: { name: "Echo", level: "Medium", hint: "Just repeat." },
   s9: { name: "Difficulties", level: "Insane", hint: "Collect the first." },
-  s10: { name: "Presence", level: "Medium", hint: "Don't move." },
+  s10: { name: "Presence", level: "Medium", hint: "AFK." },
   s11: { name: "Expression", level: "Hard", hint: "Mood." },
   s12: { name: "Clockwatcher", level: "Hard", hint: "O' clock." },
   s13: { name: "Scroll Obsession", level: "Intense", hint: "Just keep scrolling." },
@@ -79,6 +79,7 @@ const secretInfo = {
   s23: { name: "Almighty", level: "Medium", hint: "Instruction." },
   s24: { name: "Pi", level: "Easy", hint: "3.141592" },
   s25: { name: "Eclipse", level: "Extreme", hint: '<span style= "user-select: text">317427352074303020627231676874</span>.' },
+  s26: { name: "Reset data", level: "Hard", hint: "Warning."}
 };
 
 /* ===== SORT LOGIC ===== */
@@ -267,7 +268,8 @@ let askedForReal = false;
 let lastCmd = null; // lưu command trước
 let repeatCount = 0; // số lần lặp liên tiếp
 // SECRET 10 (Medium)
-let presenceTimer = null; // Presence secret
+let idleTimer = null;
+const IDLE_TIME = 30000; // 30s
 // SECRET 16 (Insane)
 let waitingForAudio = false; // trạng thái chờ user nhấn Enter để play audio
 let pressEnterTimeout = null; // lưu timeout ID
@@ -277,6 +279,8 @@ let eclipseStage = 0;
 // 0 = chưa biết gì
 // 1 = đã thấy brainfuck
 // 2 = đã thấy pastebin
+
+resetIdleTimer();
 
 input.addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
@@ -289,9 +293,13 @@ input.addEventListener("keydown", e => {
   if (cmd === "r3s3t d4t4") {
     localStorage.removeItem(SAVE_KEY);
     logCore("SAVE DATA OBLITERATED.");
+    let p = document.createElement("p");
+    let instruction = document.getElementById("instruction");
+    instruction.appendChild(p);
+    p.innerHTML = "But 2e5e7 0a7a is."
     setTimeout(() => {
       location.reload()
-    }, 1000);
+    }, 1500);
     return;
   }
   
@@ -379,11 +387,10 @@ input.addEventListener("keydown", e => {
   }
   
   // SECRET 12 (Hard)
-  let now = new Date();
-  let minutes = now.getMinutes();
-  if (!secrets.s12 && minutes === 0) {
-    logSystem("Right on time.")
-    unlockSecret("s12");
+  let now = new Date().getUTCMinutes();
+  if (!secrets.s12 && now === 0) {
+    logSystem("VN DE NZ PK.")
+    logSystem("UTC offset → A1Z26.");
   }
   
   // SECRET 14 (Intense)
@@ -499,10 +506,11 @@ input.addEventListener("keydown", e => {
       return;
     }
     eclipseStage = 2;
-    logSystem("Pastebin.");
+    logSystem("P?st?b?n. (ueoai)");
     logSystemCopyable("seKsrcdN");
     logSystem("Password: secret25.");
   }
+  
   if (cmd === "moon" && !secrets.s25) {
     if (eclipseStage < 2) {
       return;
@@ -511,23 +519,37 @@ input.addEventListener("keydown", e => {
     logSystem("Elite knowledge.");
   }
   
+  // SECRET 26 (Hard)
+  if (cmd === "2e5e7 0a7a" && !secrets.s26) {
+    logSystem("postimg - 7JXhmTDY")
+  }
+  
+  if (cmd === "innovation" && !secrets.s26) {
+    unlockSecret("s26")
+  } 
 });
 
 
 // SECRET 10 (Medium)
-input.addEventListener("focus", () => {
-  if (presenceTimer || secrets.s10) return; // đã unlock hoặc đang chạy timer
-  presenceTimer = setTimeout(() => {
-    unlockSecret("s10"); // Presence unlock sau 20s
-    logSystem("Told you.")
-  }, 20000); // 20000ms = 20s
-});
+function resetIdleTimer() {
+  if (secrets.s10) return;
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    unlockSecret("s10");
+    logSystem("Told you.");
+  }, IDLE_TIME);
+}
 
-["input", "blur"].forEach(ev => {
-  input.addEventListener(ev, () => {
-    clearTimeout(presenceTimer);
-    presenceTimer = null;
-  });
+[
+  "mousemove",
+  "mousedown",
+  "keydown",
+  "scroll",
+  "touchstart",
+  "touchmove",
+  "click"
+].forEach(ev => {
+  document.addEventListener(ev, resetIdleTimer, { passive: true });
 });
 
 // SECRET 13 (Intense)
